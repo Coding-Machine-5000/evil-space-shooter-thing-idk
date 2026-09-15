@@ -5,9 +5,10 @@ import random
 #Click on the arrow in the upper left corner to display in a new browser tab.
 import os
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
-bullets=[]
-bullet_positions=[]
+bullets=[1,2,3]
+
 #start the pygame module 
+pygame.mixer.init()
 pygame.init() 
 
 #variables for screen size: 
@@ -24,7 +25,9 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 THE_END = (33, 24, 36)
 #other variable initializers (fonts, text, images, etc)
-playerbullet='bullet_up.png'
+playerbullet1='bullet_up.png'
+playerbullet2='bullet_up.png'
+playerbullet3='bullet_up.png'
 enemybullet='bullet_down.png'
 mine='cosmic_mine.png'
 player='player.png'
@@ -35,9 +38,13 @@ enemy4='enemy.png'
 enemy5='enemy.png'
 x=325
 playerbase=850
-pby=playerbase
+pb1y=playerbase
+pb2y=playerbase
+pb3y=playerbase
 base=-50
-pbx=0
+pb1x=x
+pb2x=x
+pb3x=x
 eby=base
 e1y=base
 e2y=base
@@ -53,11 +60,23 @@ e3in=False
 e4in=False
 e5in=False
 current_bullet=0
+canFire1=True
+canFire2=True
+canFire3=True
+try:
+  background = pygame.mixer.music.load("End.mp3")
+  try:
+    pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
+  except:
+    print("Music file is not loaded, music cannot be played at this time.")
+except:
+  print("Missing the file for music, not playing music")
+
 #create a screen with dimensions 
 screen = pygame.display.set_mode((screen_width, screen_height)) 
 
 #set the screen caption 
-pygame.display.set_caption("Random Space Shooter") 
+pygame.display.set_caption("The End: The Space Shooter") 
 screen.fill(THE_END)
 
  
@@ -76,7 +95,9 @@ while keep_playing==True:
     #will stop the game loop if escape is pressed 
     if event.type == pygame.QUIT:
       keep_playing = False
-  playerbulletSprite = pygame.image.load(playerbullet)
+  playerbullet1Sprite = pygame.image.load(playerbullet1)
+  playerbullet2Sprite = pygame.image.load(playerbullet2)
+  playerbullet3Sprite = pygame.image.load(playerbullet3)
   enemybulletSprite = pygame.image.load(enemybullet)
   mineSprite = pygame.image.load(mine)
   enemySprite1 = pygame.image.load(enemy1)
@@ -87,9 +108,9 @@ while keep_playing==True:
   playerSprite = pygame.image.load(player)
   pressed = pygame.key.get_pressed()
   if pressed[pygame.K_LEFT]:
-    x-=3
+    x-=7
   elif pressed[pygame.K_RIGHT]:
-    x+=3
+    x+=7
 
   if x >= 645:
     x=645
@@ -103,13 +124,57 @@ while keep_playing==True:
   screen.blit(enemySprite3, (300,e3y))
   screen.blit(enemySprite4, (450,e4y))
   screen.blit(enemySprite5, (600,e5y))
+  screen.blit(playerbullet1Sprite, (pb1x, pb1y))
+  screen.blit(playerbullet2Sprite, (pb2x, pb2y))
+  screen.blit(playerbullet3Sprite, (pb3x, pb3y))
   screen.blit(playerSprite, (x, playerbase))
+  if pressed[pygame.K_f]:
+    if canFire1==True and current_bullet==0 and frame_ticks == 10:
+      canFire1=False
+      current_bullet=1
+      print("Bullet ",bullets[current_bullet]," selected")
+    elif canFire2==True and current_bullet==1 and frame_ticks == 20:
+      canFire2=False
+      current_bullet=2
+      print("Bullet ",bullets[current_bullet]," selected")
+    elif canFire3==True and current_bullet==2 and frame_ticks == 20:
+      canFire3=False
+      current_bullet=0
+      print("Bullet ",bullets[current_bullet]," selected")
+  if pb1y != playerbase:
+    pb1x = pb1x + random.randint(-1,1)
+  else:
+    pb1x = x
+  if canFire1==False:
+    pb1y-=15
+    if pb1y <=-50:
+      pb1y=playerbase
+      canFire1=True
+  if pb2y != playerbase:
+    pb2x=pb2x + random.randint(-1,1)
+  else:
+    pb2x = x
+  if canFire2==False:
+    pb2y-=15
+    if pb2y <=-50:
+      pb2y=playerbase
+      canFire2=True
+  if pb3y != playerbase:
+    pb3x=pb3x + random.randint(-1,1)
+  else:
+    pb3x = x
+  if canFire3==False:
+    pb3y-=15
+    if pb3y <=-50:
+      pb3y=playerbase
+      canFire3=True
+
   #This function call updates the screen 
   pygame.display.update() 
 
   #sets the frame rate
   clock.tick(60) 
-  if frame_ticks >= 60:
+  if frame_ticks >= 30:
     frame_ticks = 0
     enemySelection=random.randint(1,5)
   else:
