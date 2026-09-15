@@ -137,12 +137,12 @@ while keep_playing==True:
       canFire2=False
       current_bullet=2
       print("Bullet ",bullets[current_bullet]," selected")
-    elif canFire3==True and current_bullet==2 and frame_ticks == 20:
+    elif canFire3==True and current_bullet==2 and frame_ticks == 30:
       canFire3=False
       current_bullet=0
       print("Bullet ",bullets[current_bullet]," selected")
   if pb1y != playerbase:
-    pb1x = pb1x + random.randint(-1,1)
+    pb1x = pb1x + random.randint(-2,2)
   else:
     pb1x = x
   if canFire1==False:
@@ -151,7 +151,7 @@ while keep_playing==True:
       pb1y=playerbase
       canFire1=True
   if pb2y != playerbase:
-    pb2x=pb2x + random.randint(-1,1)
+    pb2x=pb2x + random.randint(-2,2)
   else:
     pb2x = x
   if canFire2==False:
@@ -160,7 +160,7 @@ while keep_playing==True:
       pb2y=playerbase
       canFire2=True
   if pb3y != playerbase:
-    pb3x=pb3x + random.randint(-1,1)
+    pb3x=pb3x + random.randint(-2,2)
   else:
     pb3x = x
   if canFire3==False:
