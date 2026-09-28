@@ -40,13 +40,8 @@ e2y=base
 e3y=base
 e4y=base
 e5y=base
-bulletFireSelection=1
 enemySelection=1
 frame_ticks=0
-current_bullet=0
-canFire1=True
-canFire2=True
-canFire3=True
 canFireMine=False
 mx=x
 my=playerbase
@@ -114,16 +109,6 @@ def move_player(dir, modifier):
     x-=modifier
   elif dir == 1:
     x+=modifier
-def fire_bullet(bul):
-  global canFire1
-  global canFire2
-  global canFire3
-  if bul == 1:
-    canFire1=False
-  if bul == 2:
-    canFire2=False
-  if bul == 3:
-    canFire3=False
 try:
   background = pygame.mixer.music.load("End.mp3")
   try:
