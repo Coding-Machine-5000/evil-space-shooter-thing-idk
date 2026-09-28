@@ -2,12 +2,13 @@
 import pygame 
 import random
 import time
-#anchor the pygame screen so you see it in codio.
-#Click on the arrow in the upper left corner to display in a new browser tab.
 import os
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
-bullets=[1,2,3]
+bullets=[]
+bullet_rects=[]
 enemy_list=[1,2,3,4,5]
+enemy_rects=[]
+enemy_health=[]
 #start the pygame module 
 pygame.mixer.init()
 pygame.init() 
@@ -32,14 +33,8 @@ EnemyHealth3=50
 EnemyHealth4=50
 EnemyHealth5=50
 playerbase=850
-pb1y=playerbase
-pb2y=playerbase
-pb3y=playerbase
 base=-50
-#pb stands for Player Bullet
-pb1x=x
-pb2x=x
-pb3x=x
+safecheck=False
 e1y=base
 e2y=base
 e3y=base
@@ -58,15 +53,21 @@ my=playerbase
 score=0
 def draw_player(sprite, posx, posy):
   screen.blit(sprite, (posx, posy))
-def update_bullet_1(rate):
-  global pb1y
-  pb1y-=rate
-def update_bullet_2(rate):
-  global pb2y
-  pb2y-=rate
-def update_bullet_3(rate):
-  global pb3y
-  pb3y-=rate
+def update_bullet(rate):
+  for i in range(0,len(bullets)-1):
+    bullet_rects[i].y-=rate
+    print(bullet_rects[i].y)
+    if bullet_rects[i].y <= -50:
+      bullets.remove(bullets[i])
+      bullet_rects.remove(bullet_rects[i])
+def create_bullet():
+  global playerbulletRect
+  playerbulletSprite = pygame.image.load(bullet)
+  bullets.append(playerbulletSprite)
+  playerbulletRect = playerbulletSprite.get_rect()
+  playerbulletRect.x=x
+  playerbulletRect.y=850
+  bullet_rects.append(playerbulletRect)  
 def update_enemy(e):
   global enemySelection
   enemySelection=e
@@ -147,9 +148,7 @@ while keep_playing==True:
     #will stop the game loop if escape is pressed 
     if event.type == pygame.QUIT:
       keep_playing = False
-  playerbullet1Sprite = pygame.image.load(bullet)
-  playerbullet2Sprite = pygame.image.load(bullet)
-  playerbullet3Sprite = pygame.image.load(bullet)
+  playerbulletSprite = pygame.image.load(bullet)
   background=pygame.image.load(bg_islands)
   mineSprite = pygame.image.load(mine)
   enemySprite1 = pygame.image.load(enemy)
@@ -175,7 +174,11 @@ while keep_playing==True:
     my-=5
   else:
     mx=x
-    my=playerbase  
+    my=playerbase
+  if pressed[pygame.K_f]:
+    if frame_ticks == 10 or frame_ticks == 20 or frame_ticks == 30:
+      create_bullet()
+  update_bullet(5)
   if my < 200:
     EnemyHealth1=0
     EnemyHealth2=0
@@ -188,72 +191,12 @@ while keep_playing==True:
   if mine_cooldown <= 0:
     canFireMine=True
     mine_cooldown=0
-  else:  
+  else:
     mine_cooldown-=1
   if x >= 645:
     x=645
   if x <= -5:
     x=-5
-  if pb1y <= e1y + 20 and (pb1x <= 64 and pb1x >= -50):
-      EnemyHealth1-=5
-      canFire1=True
-      pb1y=playerbase
-  elif pb2y <= e1y + 20 and (pb2x <= 64 and pb2x >= -50):
-      EnemyHealth1-=5
-      canFire2=True
-      pb2y=playerbase
-  elif pb3y <= e1y + 20 and (pb3x <= 64 and pb3x >= -50):
-      EnemyHealth1-=5
-      canFire3=True
-      pb3y=playerbase
-  if pb1y <= e2y + 20 and (pb1x <= 214 and pb1x >= 100):
-      EnemyHealth2-=5
-      canFire1=True
-      pb1y=playerbase
-  elif pb2y <= e2y + 20 and (pb2x <= 214 and pb2x >= 100):
-      EnemyHealth2-=5
-      canFire2=True
-      pb2y=playerbase
-  elif pb3y <= e2y + 20 and (pb3x <= 214 and pb3x >= 100):
-      EnemyHealth2-=5
-      canFire3=True
-      pb3y=playerbase
-  if pb1y <= e3y + 20 and (pb1x <= 364 and pb1x >= 250):
-      EnemyHealth3-=5
-      canFire1=True
-      pb1y=playerbase
-  elif pb2y <= e3y + 20 and (pb2x <= 364 and pb2x >= 250):
-      EnemyHealth3-=5
-      canFire2=True
-      pb2y=playerbase
-  elif pb3y <= e3y + 20 and (pb3x <= 364 and pb3x >= 250):
-      EnemyHealth3-=5
-      canFire3=True
-      pb3y=playerbase
-  if pb1y <= e4y + 20 and (pb1x <= 514 and pb1x >= 400):
-      EnemyHealth4-=5
-      canFire1=True
-      pb1y=playerbase
-  elif pb2y <= e4y + 20 and (pb2x <= 514 and pb2x >= 400):
-      EnemyHealth4-=5
-      canFire2=True
-      pb2y=playerbase
-  elif pb3y <= e4y + 20 and (pb3x <= 514 and pb3x >= 400):
-      EnemyHealth4-=5
-      canFire3=True
-      pb3y=playerbase
-  if pb1y <= e5y + 20 and (pb1x <= 664 and pb1x >= 550):
-      EnemyHealth5-=5
-      canFire1=True
-      pb1y=playerbase
-  elif pb2y <= e5y + 20 and (pb2x <= 664 and pb2x >= 550):
-      EnemyHealth5-=5
-      canFire2=True
-      pb2y=playerbase
-  elif pb3y <= e5y + 20 and (pb3x <= 664 and pb3x >= 550):
-      EnemyHealth5-=5
-      canFire3=True
-      pb3y=playerbase
   if EnemyHealth1 <= 0:
       EnemyHealth1=50
       score+=200
@@ -284,47 +227,9 @@ while keep_playing==True:
   screen.blit(enemySprite3, (300,e3y))
   screen.blit(enemySprite4, (450,e4y))
   screen.blit(enemySprite5, (600,e5y))
-  screen.blit(playerbullet1Sprite, (pb1x, pb1y))
-  screen.blit(playerbullet2Sprite, (pb2x, pb2y))
-  screen.blit(playerbullet3Sprite, (pb3x, pb3y))
+  for bullet_number in range(0,len(bullets)):
+    screen.blit(bullets[bullet_number], (bullet_rects[bullet_number].x,bullet_rects[bullet_number].y))
   draw_player(playerSprite, x, playerbase)
-  if pressed[pygame.K_f]:
-    if canFire1==True and current_bullet==0 and frame_ticks == 10:
-      fire_bullet(1)
-      current_bullet=1
-    elif canFire2==True and current_bullet==1 and frame_ticks == 20:
-      fire_bullet(2)
-      current_bullet=2
-    elif canFire3==True and current_bullet==2 and frame_ticks == 30:
-      fire_bullet(3)
-      current_bullet=0
-  if pb1y != playerbase:
-    pb1x = pb1x
-  else:
-    pb1x = x
-  if canFire1==False:
-    update_bullet_1(15)
-    if pb1y <=-50:
-      pb1y=playerbase
-      canFire1=True
-  if pb2y != playerbase:
-    pb2x=pb2x
-  else:
-    pb2x = x
-  if canFire2==False:
-    update_bullet_2(15)
-    if pb2y <=-50:
-      pb2y=playerbase
-      canFire2=True
-  if pb3y != playerbase:
-    pb3x=pb3x
-  else:
-    pb3x = x
-  if canFire3==False:
-    update_bullet_3(15)
-    if pb3y <=-50:
-      pb3y=playerbase
-      canFire3=True
   if e1y > playerbase or e2y > playerbase or e3y > playerbase or e4y > playerbase or e5y > playerbase:
     print("Game Over! Restarting game!")
     time.sleep(5)
