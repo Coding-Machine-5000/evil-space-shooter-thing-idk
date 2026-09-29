@@ -52,7 +52,7 @@ def update_bullet(rate):
               enemy_rects.remove(enemy_rects[h])
               enemy_health.remove(enemy_health[h])
               score+=100
-              bulletenemysounds.play(kill)
+              kill.play()
             else:
               enemy_health[h]-=25
               bullets.remove(bullets[i])
@@ -150,7 +150,7 @@ while keep_playing==True:
     played=False
   if canFireMine==False and firedMine==True:
     mx=mx
-    my-=5
+    my-=10
   else:
     mx=x
     my=playerbase
