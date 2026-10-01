@@ -49,7 +49,7 @@ finalboss_y=-400
 spawnedBoss=False
 spawnedFinalBoss=False
 boss_health_base=1500
-finalboss_health_base=4500
+finalboss_health_base=6000
 finalboss_health=finalboss_health_base
 boss_health=boss_health_base
 boss_deaths=0
@@ -291,7 +291,7 @@ while keep_playing==True:
     finalbossRect.x=158
     if finalboss_y >=1000:
       enemies_escaped=10
-    if finalboss_health <= 4500 and finalboss_health >=1000 and state=="Loop":
+    if finalboss_health <= 6000 and finalboss_health >=1000 and state=="Loop":
       screen.blit(text5, (475, 825))
     elif finalboss_health <= 999 and finalboss_health >= 100 and state=="Loop":
       screen.blit(text5, (510, 825))
