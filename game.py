@@ -268,7 +268,6 @@ while keep_playing==True:
   if (enemies_killed >= 100 and enemies_killed <=105 and boss_deaths==0) or (enemies_killed >= 200 and enemies_killed <= 205 and boss_deaths==1) and spawnedBoss==False and hasSpawned==False and state=="Loop":
     spawnedBoss=True
     hasSpawned=True
-    boss_health=boss_health_base
   elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and state=="Loop" and boss_deaths>=2:
     spawnedFinalBoss=True
     hasSpawnedFinal=True
@@ -277,6 +276,8 @@ while keep_playing==True:
     boss_y+=0.3
     bossRect.y=boss_y
     bossRect.x=234
+    if boss_y>=1000:
+      enemies_escaped=10
     if boss_health <= 1500 and boss_health >=1000 and state=="Loop":
       screen.blit(text3, (475, 825))
     elif boss_health <= 999 and boss_health >= 100 and state=="Loop":
@@ -288,6 +289,8 @@ while keep_playing==True:
     finalboss_y+=0.1
     finalbossRect.y=finalboss_y
     finalbossRect.x=158
+    if finalboss_y >=1000:
+      enemies_escaped=10
     if finalboss_health <= 4500 and finalboss_health >=1000 and state=="Loop":
       screen.blit(text5, (475, 825))
     elif finalboss_health <= 999 and finalboss_health >= 100 and state=="Loop":
@@ -295,12 +298,14 @@ while keep_playing==True:
     elif finalboss_health <=99 and finalboss_health >=0 and state=="Loop":
       screen.blit(text5, (545, 825))
   if spawnedBoss==False and boss_deaths==1 and state=="Loop":
-    threshold=70
+    threshold=75
     hasSpawned=False
+    boss_y=-100
+    boss_health=boss_health_base
   elif spawnedBoss==False and hasSpawned==True and boss_deaths==2 and state=="Loop":
-    threshold=60
+    threshold=70
   elif spawnedFinalBoss==False and hasSpawned==True and hasSpawnedFinal==True and state=="Loop":
-    threshold=50
+    threshold=65
   for bullet_number in range(0,len(bullets)-1):
     screen.blit(bullets[bullet_number], (bullet_rects[bullet_number].x,bullet_rects[bullet_number].y))
   for enemy_c in range(0,len(enemy_list)-1):
