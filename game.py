@@ -334,6 +334,7 @@ while keep_playing==True:
       enemy_list.clear()
       enemy_rects.clear()
       enemy_health.clear()
+      begin.play()
   elif score >= highscore:
     highscore=score
   screen.blit(text,(0, 900))
