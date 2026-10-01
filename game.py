@@ -39,6 +39,7 @@ mine_cooldown=500
 playerbase=850
 frame_ticks=0
 canFireMine=False
+enemy_limit=25
 mx=x
 bossSprite=pygame.image.load(boss)
 finalbossSprite=pygame.image.load(final_boss)
@@ -259,7 +260,7 @@ while keep_playing==True:
     x=645
   if x <= -5 and state=="Loop":
     x=-5
-  if len(enemy_list) <= 25 and frame_ticks == 15 and enemySpawnChance >=threshold and spawnedBoss==False and state=="Loop" and spawnedFinalBoss==False:
+  if len(enemy_list) <= enemy_limit and frame_ticks == 15 and enemySpawnChance >=threshold and spawnedBoss==False and state=="Loop" and spawnedFinalBoss==False:
     spawn_enemy(random.randint(0,screen_width-64), -50, 200)
   #all items drawn to the screen go here
   screen.fill(THE_END)
@@ -304,8 +305,10 @@ while keep_playing==True:
     boss_health=boss_health_base
   elif spawnedBoss==False and hasSpawned==True and boss_deaths==2 and state=="Loop":
     threshold=70
+    enemy_limit=35
   elif spawnedFinalBoss==False and hasSpawned==True and hasSpawnedFinal==True and state=="Loop":
-    threshold=65
+    threshold=35
+    enemy_limit=50
   for bullet_number in range(0,len(bullets)-1):
     screen.blit(bullets[bullet_number], (bullet_rects[bullet_number].x,bullet_rects[bullet_number].y))
   for enemy_c in range(0,len(enemy_list)-1):
@@ -329,6 +332,7 @@ while keep_playing==True:
       hasSpawned=False
       threshold=85
       spawnedBoss=False
+      enemy_limit=25
       bullets.clear()
       bullet_rects.clear()
       enemy_list.clear()
@@ -351,7 +355,7 @@ while keep_playing==True:
     frame_ticks = 0
     enemySpawnChance=random.randint(0,100)
   else:
-    if spawnedFinalBoss==True:
+    if hasSpawnedFinal==True:
       frame_ticks+=3
     else:
       frame_ticks+=1
