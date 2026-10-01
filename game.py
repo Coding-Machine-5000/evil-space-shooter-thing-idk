@@ -265,7 +265,7 @@ while keep_playing==True:
   screen.fill(THE_END)
   screen.blit(background, (-256, scroll_y))
   screen.blit(mineSprite, (mx, my))
-  if (enemies_killed >= 100 and enemies_killed <=120) or (enemies_killed >= 200 and enemies_killed <= 220) and spawnedBoss==False and hasSpawned==False and state=="Loop":
+  if (enemies_killed >= 100 and enemies_killed <=105 and boss_deaths==0) or (enemies_killed >= 200 and enemies_killed <= 205 and boss_deaths==1) and spawnedBoss==False and hasSpawned==False and state=="Loop":
     spawnedBoss=True
     hasSpawned=True
   elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and state=="Loop" and boss_deaths>=2:
