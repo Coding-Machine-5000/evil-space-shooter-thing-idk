@@ -16,6 +16,7 @@ pygame.init()
 screen_width=700
 screen_height=1000
 hasSpawned=False
+hasSpawnedFinal=False
 threshold=85
 #color code constants 
 THE_END = (33, 24, 36)
@@ -29,6 +30,7 @@ player='player.png'
 enemy='enemy.png'
 bg_islands='BG.png'
 boss='boss.png'
+final_boss='final_boss.png'
 screen_go='GameOver.png'
 x=325
 scroll_y=-1024
@@ -39,11 +41,18 @@ frame_ticks=0
 canFireMine=False
 mx=x
 bossSprite=pygame.image.load(boss)
+finalbossSprite=pygame.image.load(final_boss)
 bossRect=bossSprite.get_rect()
+finalbossRect=finalbossSprite.get_rect()
 boss_y=-200
+finalboss_y=-400
 spawnedBoss=False
-boss_health_base=1000
+spawnedFinalBoss=False
+boss_health_base=1500
+finalboss_health_base=4500
+finalboss_health=finalboss_health_base
 boss_health=boss_health_base
+boss_deaths=0
 enemies_killed=0
 enemies_escaped=0
 state="Loop"
@@ -59,6 +68,9 @@ def update_bullet(rate):
   global enemies_killed
   global spawnedBoss
   global boss_health
+  global boss_deaths
+  global spawnedFinalBoss
+  global finalboss_health
   for i in range(0,len(bullets)-1):
     try:
       bullet_rects[i].y-=rate
@@ -68,13 +80,27 @@ def update_bullet(rate):
       elif bullet_rects[i].colliderect(bossRect) and spawnedBoss==True:
         if boss_health<=0:
           spawnedBoss=False
+          boss_deaths+=1
           score+=2000
           kill.play()
           boom.play()
           bullets.remove(bullets[i])
           bullet_rects.remove(bullet_rects[i])
         else:
-          boss_health-=5
+          boss_health-=10
+          impact.play()
+          bullets.remove(bullets[i])
+          bullet_rects.remove(bullet_rects[i])
+      elif bullet_rects[i].colliderect(finalbossRect) and spawnedFinalBoss==True:
+        if finalboss_health<=0:
+          spawnedFinalBoss=False
+          score+=10000
+          kill.play()
+          boom.play()
+          bullets.remove(bullets[i])
+          bullet_rects.remove(bullet_rects[i])
+        else:
+          finalboss_health-=5
           impact.play()
           bullets.remove(bullets[i])
           bullet_rects.remove(bullet_rects[i])
@@ -173,6 +199,7 @@ while keep_playing==True:
   text2=font.render(str(enemies_killed), True, GRN)
   text3=font.render(str(boss_health), True, BLU)
   text4=font.render(str(enemies_escaped), True, RED)
+  text5=font.render(str(finalboss_health), True, BLU)
   playerbulletSprite = pygame.image.load(bullet)
   background=pygame.image.load(bg_islands)
   mineSprite = pygame.image.load(mine)
@@ -200,7 +227,10 @@ while keep_playing==True:
   if pressed[pygame.K_f] and state=="Loop":
     if frame_ticks == 15 or frame_ticks ==30 and state=="Loop":
       create_bullet()
-  update_bullet(5)
+  if spawnedFinalBoss==True:
+    update_bullet(10)
+  else:
+    update_bullet(5)
   if my <= 200 and state=="Loop":
     try:
       for h in range(0,len(enemy_health)-1):
@@ -229,28 +259,47 @@ while keep_playing==True:
     x=645
   if x <= -5 and state=="Loop":
     x=-5
-  if len(enemy_list) <= 25 and frame_ticks == 15 and enemySpawnChance >=threshold and spawnedBoss==False and state=="Loop":
+  if len(enemy_list) <= 25 and frame_ticks == 15 and enemySpawnChance >=threshold and spawnedBoss==False and state=="Loop" and spawnedFinalBoss==False:
     spawn_enemy(random.randint(0,screen_width-64), -50, 200)
   #all items drawn to the screen go here
   screen.fill(THE_END)
   screen.blit(background, (-256, scroll_y))
   screen.blit(mineSprite, (mx, my))
-  if enemies_killed >= 100 and spawnedBoss==False and hasSpawned==False and state=="Loop":
+  if (enemies_killed >= 100 and enemies_killed <=120) or (enemies_killed >= 200 and enemies_killed <= 220) and spawnedBoss==False and hasSpawned==False and state=="Loop":
     spawnedBoss=True
     hasSpawned=True
+  elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and state=="Loop" and boss_deaths>=2:
+    spawnedFinalBoss=True
+    hasSpawnedFinal=True
   if spawnedBoss==True and state=="Loop":
     screen.blit(bossSprite, (234,boss_y))
-    boss_y+=0.1
+    boss_y+=0.3
     bossRect.y=boss_y
     bossRect.x=234
-    if boss_health == 1000 and state=="Loop":
+    if boss_health <= 1500 and boss_health >=1000 and state=="Loop":
       screen.blit(text3, (475, 825))
     elif boss_health <= 999 and boss_health >= 100 and state=="Loop":
       screen.blit(text3, (510, 825))
     elif boss_health <=99 and boss_health >=0 and state=="Loop":
       screen.blit(text3, (545, 825))
-  if spawnedBoss==False and hasSpawned==True and state=="Loop":
+  if spawnedFinalBoss==True and state=="Loop":
+    screen.blit(finalbossSprite, (158,finalboss_y))
+    finalboss_y+=0.1
+    finalbossRect.y=finalboss_y
+    finalbossRect.x=158
+    if finalboss_health <= 4500 and finalboss_health >=1000 and state=="Loop":
+      screen.blit(text5, (475, 825))
+    elif finalboss_health <= 999 and finalboss_health >= 100 and state=="Loop":
+      screen.blit(text5, (510, 825))
+    elif finalboss_health <=99 and finalboss_health >=0 and state=="Loop":
+      screen.blit(text5, (545, 825))
+  if spawnedBoss==False and boss_deaths==1 and state=="Loop":
     threshold=70
+    hasSpawned=False
+  elif spawnedBoss==False and hasSpawned==True and boss_deaths==2 and state=="Loop":
+    threshold=60
+  elif spawnedFinalBoss==False and hasSpawned==True and hasSpawnedFinal==True and state=="Loop":
+    threshold=50
   for bullet_number in range(0,len(bullets)-1):
     screen.blit(bullets[bullet_number], (bullet_rects[bullet_number].x,bullet_rects[bullet_number].y))
   for enemy_c in range(0,len(enemy_list)-1):
@@ -267,8 +316,10 @@ while keep_playing==True:
     if pressed[pygame.K_r]:
       state="Loop"
       enemies_escaped=0
+      enemies_killed=0
       boss_y=-100
-      boss_health=1000
+      boss_health=boss_health_base
+      boss_deaths=0
       hasSpawned=False
       threshold=85
       spawnedBoss=False
@@ -293,7 +344,10 @@ while keep_playing==True:
     frame_ticks = 0
     enemySpawnChance=random.randint(0,100)
   else:
-    frame_ticks+=1
+    if spawnedFinalBoss==True:
+      frame_ticks+=3
+    else:
+      frame_ticks+=1
 #quits the pygame module 
 pygame.quit() 
 quit() 
