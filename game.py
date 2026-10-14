@@ -236,6 +236,10 @@ while keep_playing==True:
     update_bullet(5)
   if my <= 200 and state=="Loop":
     try:
+      if spawnedBoss == True:
+        boss_health-=475
+      elif spawnedFinalBoss == True:
+        boss_health-=725
       for h in range(0,len(enemy_health)-1):
         enemy_health[h]-=10000
         enemy_list.remove(enemy_list[h])
