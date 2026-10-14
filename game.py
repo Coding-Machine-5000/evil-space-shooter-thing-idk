@@ -9,6 +9,7 @@ bullet_rects=[]
 enemy_list=[]
 enemy_rects=[]
 enemy_health=[]
+bg_island_list=["BGVanilla.png","BGReef.png","BGWilds.png","BGCorruption.png"]
 #start the pygame module 
 pygame.mixer.init()
 pygame.init() 
@@ -28,7 +29,6 @@ bullet='bullet_up.png'
 mine='cosmic_mine.png'
 player='player.png'
 enemy='enemy.png'
-bg_islands='BG.png'
 boss='boss.png'
 final_boss='final_boss.png'
 screen_go='GameOver.png'
@@ -62,6 +62,8 @@ enemySpawnChance=0
 my=playerbase
 score=0
 highscore=score
+bg_island_choice=bg_island_list[random.randint(0,3)]
+bg_islands=bg_island_choice
 def draw_player(sprite, posx, posy):
   screen.blit(sprite, (posx, posy))
 def update_bullet(rate):
@@ -316,6 +318,8 @@ while keep_playing==True:
   draw_player(playerSprite, x, playerbase)
   if scroll_y >= 1024:
     scroll_y=-1024
+    bg_island_choice=bg_island_list[random.randint(0,3)]
+    bg_islands=bg_island_choice
   else:
     scroll_y+=2
   if enemies_escaped >=10:
@@ -330,6 +334,7 @@ while keep_playing==True:
       boss_health=boss_health_base
       boss_deaths=0
       hasSpawned=False
+      hasSpawnedFinal=False
       threshold=85
       spawnedBoss=False
       enemy_limit=25

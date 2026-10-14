@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+    <title>The End Space Shooter</title>
+</head>
+<body>
+    <h1>Leaderboard Submission for T.E.S.S.</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.username.label }} {{ form.username(size=20) }}
+        {{ form.score.label }} {{ form.score() }}
+        {{ form.submit() }}
+      </form>
+</body>
+</html>
