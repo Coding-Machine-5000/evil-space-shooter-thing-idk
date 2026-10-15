@@ -4,32 +4,48 @@ import sqlite3
 app=Flask(__name__)
 
 app.secret_key='supersecretkey'
+
 @app.route('/')
 def home():
     return render_template("index.html")
+
 @app.route('/submit', methods=['GET','POST'] )
 def form():
     form=Leaderboard()
     if request.method == 'POST' and form.validate_on_submit():
         username = request.form['username']
         score=request.form['score']
-        with sqlite3.connect("database.db") as users:
+        with sqlite3.connect("scoreboard.db") as users:
             cursor = users.cursor()
-            cursor.execute("INSERT INTO LEADERBOARD \
+            cursor.execute("INSERT OR REPLACE INTO LEADERBOARD \
             (username,score) VALUES (?,?)",
                            (username, score))
             users.commit()
         return render_template("index.html")
     else:
         return render_template('form.html', form=form)
+
 @app.route('/leaderboard', methods=['GET','POST'] )
 def leaderboard():
     connect = sqlite3.connect('scoreboard.db')
     cursor = connect.cursor()
-    cursor.execute('SELECT * FROM LEADERBOARD')
+    cursor.execute('SELECT * FROM LEADERBOARD ORDER BY score ASC;')
 
     data = cursor.fetchall()
     return render_template("leaderboard.html", data=data)
+
+@app.route('/info')
+def info():
+    return render_template("info.html")
+@app.route("/info/levels")
+def levels():
+    return render_template("levels.html")
+@app.route("/info/enemies")
+def enemies():
+    return render_template("enemies.html")
+@app.route("/info/scoring")
+def scoring():
+    return render_template("scoring.html")
 
 connect = sqlite3.connect('scoreboard.db')
 connect.execute(

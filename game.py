@@ -19,8 +19,10 @@ screen_height=1000
 hasSpawned=False
 hasSpawnedFinal=False
 threshold=85
+inAether=False
 #color code constants 
 THE_END = (33, 24, 36)
+THE_AETHER = (24,155,204)
 RED=(200,0,0)
 GRN=(0,200,0)
 BLU=(0,0,200)
@@ -31,8 +33,10 @@ player='player.png'
 enemy='enemy.png'
 boss='boss.png'
 final_boss='final_boss.png'
+queen_boss='queen_boss.png'
 screen_go='GameOver.png'
 x=325
+aethercontrol=False
 scroll_y=-1024
 firedMine=False
 mine_cooldown=500
@@ -43,14 +47,21 @@ enemy_limit=25
 mx=x
 bossSprite=pygame.image.load(boss)
 finalbossSprite=pygame.image.load(final_boss)
+queenbossSprite=pygame.image.load(queen_boss)
 bossRect=bossSprite.get_rect()
 finalbossRect=finalbossSprite.get_rect()
+queenbossRect=queenbossSprite.get_rect()
 boss_y=-200
 finalboss_y=-400
+queenboss_y=-200
 spawnedBoss=False
 spawnedFinalBoss=False
+spawnedQueenBoss=False
+hasSpawnedQueen=False
 boss_health_base=1500
 finalboss_health_base=6000
+queenboss_health_base=3000
+queenboss_health=queenboss_health_base
 finalboss_health=finalboss_health_base
 boss_health=boss_health_base
 boss_deaths=0
@@ -74,6 +85,8 @@ def update_bullet(rate):
   global boss_deaths
   global spawnedFinalBoss
   global finalboss_health
+  global spawnedQueenBoss
+  global queenboss_health
   for i in range(0,len(bullets)-1):
     try:
       bullet_rects[i].y-=rate
@@ -107,13 +120,29 @@ def update_bullet(rate):
           impact.play()
           bullets.remove(bullets[i])
           bullet_rects.remove(bullet_rects[i])
+      elif bullet_rects[i].colliderect(queenbossRect) and spawnedQueenBoss==True:
+        if queenboss_health<=0:
+          spawnedQueenBoss=False
+          score+=25000
+          kill.play()
+          boom.play()
+          bullets.remove(bullets[i])
+          bullet_rects.remove(bullet_rects[i])
+        else:
+          queenboss_health-=5
+          impact.play()
+          bullets.remove(bullets[i])
+          bullet_rects.remove(bullet_rects[i])
       for h in range(0, len(enemy_list)-1):
           if bullet_rects[i].colliderect(enemy_rects[h]):
             if enemy_health[h] <= 0:
               enemy_list.remove(enemy_list[h])
               enemy_rects.remove(enemy_rects[h])
               enemy_health.remove(enemy_health[h])
-              score+=100
+              if inAether == True:
+                score+=200
+              else:
+                score+=100
               kill.play()
               enemies_killed+=1
             else:
@@ -171,15 +200,13 @@ minesounds=pygame.mixer.Channel(2)
 alarm=pygame.mixer.Sound("escape_warning.wav")
 screenSprite=pygame.image.load(screen_go)
 try:
-  background = pygame.mixer.music.load("End.mp3")
-  
-  try:
-    bulletenemysounds.play(begin,loops=0,maxtime=0,fade_ms=0)
-    pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
-  except:
-    print("Music file is not loaded, music cannot be played at this time.")
+  background = "End.mp3"
+  background_aether = "Aether.mp3"
+  bulletenemysounds.play(begin,loops=0,maxtime=0,fade_ms=0)
+  currentMusic=pygame.mixer.music.load(background)
+  pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
 except:
-  print("Missing the file for music, not playing music")
+  print("Missing the file for music!")
 #create a screen with dimensions 
 screen = pygame.display.set_mode((screen_width, screen_height))
 font = pygame.font.SysFont("arial", 72)
@@ -203,6 +230,7 @@ while keep_playing==True:
   text3=font.render(str(boss_health), True, BLU)
   text4=font.render(str(enemies_escaped), True, RED)
   text5=font.render(str(finalboss_health), True, BLU)
+  text6=font.render(str(queenboss_health), True, BLU)
   playerbulletSprite = pygame.image.load(bullet)
   background=pygame.image.load(bg_islands)
   mineSprite = pygame.image.load(mine)
@@ -238,8 +266,10 @@ while keep_playing==True:
     try:
       if spawnedBoss == True:
         boss_health-=475
-      elif spawnedFinalBoss == True:
-        boss_health-=725
+      if spawnedFinalBoss == True:
+        finalboss_health-=725
+      if spawnedQueenBoss == True:
+        queenboss_health-=1000
       for h in range(0,len(enemy_health)-1):
         enemy_health[h]-=10000
         enemy_list.remove(enemy_list[h])
@@ -266,10 +296,16 @@ while keep_playing==True:
     x=645
   if x <= -5 and state=="Loop":
     x=-5
-  if len(enemy_list) <= enemy_limit and frame_ticks == 15 and enemySpawnChance >=threshold and spawnedBoss==False and state=="Loop" and spawnedFinalBoss==False:
+  if len(enemy_list) <= enemy_limit and frame_ticks == 15 and enemySpawnChance > threshold and spawnedBoss==False and state=="Loop" and spawnedFinalBoss==False and spawnedQueenBoss == False:
     spawn_enemy(random.randint(0,screen_width-64), -50, 200)
   #all items drawn to the screen go here
-  screen.fill(THE_END)
+  if inAether == True:
+    screen.fill(THE_AETHER)
+    enemy='enemy_aether.png'
+    bg_island_choice="BGAether.png"
+    bg_islands=bg_island_choice
+  else:
+    screen.fill(THE_END)
   screen.blit(background, (-256, scroll_y))
   screen.blit(mineSprite, (mx, my))
   if (enemies_killed >= 100 and enemies_killed <=105 and boss_deaths==0) or (enemies_killed >= 200 and enemies_killed <= 205 and boss_deaths==1) and spawnedBoss==False and hasSpawned==False and state=="Loop":
@@ -278,6 +314,12 @@ while keep_playing==True:
   elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and state=="Loop" and boss_deaths>=2:
     spawnedFinalBoss=True
     hasSpawnedFinal=True
+  elif enemies_killed >= 500 and inAether == False:
+    inAether=True
+    hasSpawnedFinal=False
+  elif enemies_killed >= 700 and spawnedQueenBoss == False and hasSpawnedQueen==False and state=="Loop":
+    spawnedQueenBoss=True
+    hasSpawnedQueen=True
   if spawnedBoss==True and state=="Loop":
     screen.blit(bossSprite, (234,boss_y))
     boss_y+=0.3
@@ -290,6 +332,19 @@ while keep_playing==True:
     elif boss_health <= 999 and boss_health >= 100 and state=="Loop":
       screen.blit(text3, (510, 825))
     elif boss_health <=99 and boss_health >=0 and state=="Loop":
+      screen.blit(text3, (545, 825))
+  if spawnedQueenBoss==True and state=="Loop":
+    screen.blit(queenbossSprite, (234,queenboss_y))
+    queenboss_y+=0.2
+    queenbossRect.y=queenboss_y
+    queenbossRect.x=234
+    if queenboss_y>=1000:
+      enemies_escaped=10
+    if queenboss_health <= 1500 and queenboss_health >=1000 and state=="Loop":
+      screen.blit(text3, (475, 825))
+    elif queenboss_health <= 999 and queenboss_health >= 100 and state=="Loop":
+      screen.blit(text3, (510, 825))
+    elif queenboss_health <=99 and queenboss_health >=0 and state=="Loop":
       screen.blit(text3, (545, 825))
   if spawnedFinalBoss==True and state=="Loop":
     screen.blit(finalbossSprite, (158,finalboss_y))
@@ -315,6 +370,9 @@ while keep_playing==True:
   elif spawnedFinalBoss==False and hasSpawned==True and hasSpawnedFinal==True and state=="Loop":
     threshold=35
     enemy_limit=50
+  elif inAether==True and state=="Loop" and hasSpawnedFinal==True:
+    threshold=85
+    enemy_limit=75
   for bullet_number in range(0,len(bullets)-1):
     screen.blit(bullets[bullet_number], (bullet_rects[bullet_number].x,bullet_rects[bullet_number].y))
   for enemy_c in range(0,len(enemy_list)-1):
@@ -348,12 +406,27 @@ while keep_playing==True:
       enemy_rects.clear()
       enemy_health.clear()
       begin.play()
+      inAether=False
+      if aethercontrol == True:
+        aethercontrol=False
+        try:
+          currentMusic=pygame.mixer.music.load(background)
+          pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
+        except:
+          print("Missing the file for music!")
   elif score >= highscore:
     highscore=score
   screen.blit(text,(0, 900))
   screen.blit(texthigh,(0, 0))
   screen.blit(text2,(0, 825))
   screen.blit(text4, (600, 900))
+  if inAether==True and aethercontrol == False:
+    aethercontrol=True
+    try:
+      currentMusic=pygame.mixer.music.load(background_aether)
+      pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
+    except:
+      print("Missing the file for music!")
   #This function call updates the screen 
   pygame.display.update() 
   update_enemy(1)
@@ -364,10 +437,10 @@ while keep_playing==True:
     frame_ticks = 0
     enemySpawnChance=random.randint(0,100)
   else:
-    if hasSpawnedFinal==True:
+    if hasSpawnedFinal==True or hasSpawnedQueen == True:
       frame_ticks+=3
     else:
       frame_ticks+=1
 #quits the pygame module 
 pygame.quit() 
-quit() 
+quit()
