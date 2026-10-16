@@ -330,6 +330,7 @@ while keep_playing==True:
   elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and finalDead==False and state=="Loop" and boss_deaths>=2:
     spawnedFinalBoss=True
     hasSpawnedFinal=True
+    finalDead=True
   elif enemies_killed >= 500 and inAether == False:
     inAether=True
     hasSpawnedFinal=False
