@@ -19,6 +19,7 @@ screen_width=700
 screen_height=1000
 hasSpawned=False
 hasSpawnedFinal=False
+finalDead = False
 threshold=85
 inAether=False
 #color code constants 
@@ -65,7 +66,7 @@ queenboss_health_base=3000
 queenboss_health=queenboss_health_base
 finalboss_health=finalboss_health_base
 boss_health=boss_health_base
-boss_deaths=0
+boss_deaths=2
 enemies_killed=0
 enemies_escaped=0
 state="Loop"
@@ -88,6 +89,7 @@ def update_bullet(rate):
   global finalboss_health
   global spawnedQueenBoss
   global queenboss_health
+  global finalDead
   for i in range(0,len(bullets)-1):
     try:
       bullet_rects[i].y-=rate
@@ -116,6 +118,7 @@ def update_bullet(rate):
           boom.play()
           bullets.remove(bullets[i])
           bullet_rects.remove(bullet_rects[i])
+          finalDead=True
         else:
           finalboss_health-=5
           impact.play()
@@ -324,12 +327,15 @@ while keep_playing==True:
   if (enemies_killed >= 100 and enemies_killed <=105 and boss_deaths==0) or (enemies_killed >= 200 and enemies_killed <= 205 and boss_deaths==1) and spawnedBoss==False and hasSpawned==False and state=="Loop":
     spawnedBoss=True
     hasSpawned=True
-  elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and state=="Loop" and boss_deaths>=2:
+  elif enemies_killed >= 300 and spawnedFinalBoss==False and hasSpawnedFinal==False and finalDead==False and state=="Loop" and boss_deaths>=2:
     spawnedFinalBoss=True
     hasSpawnedFinal=True
   elif enemies_killed >= 500 and inAether == False:
     inAether=True
     hasSpawnedFinal=False
+    enemy_list.clear()
+    enemy_health.clear()
+    enemy_rects.clear()
   elif enemies_killed >= 700 and spawnedQueenBoss == False and hasSpawnedQueen==False and state=="Loop":
     spawnedQueenBoss=True
     hasSpawnedQueen=True
@@ -383,7 +389,7 @@ while keep_playing==True:
   elif spawnedFinalBoss==False and hasSpawned==True and hasSpawnedFinal==True and state=="Loop":
     threshold=35
     enemy_limit=50
-  elif inAether==True and state=="Loop" and hasSpawnedFinal==True:
+  elif inAether==True and state=="Loop" and hasSpawnedFinal==True and hasSpawned==True and spawnedFinalBoss==False:
     threshold=85
     enemy_limit=75
   for bullet_number in range(0,len(bullets)-1):
@@ -410,6 +416,8 @@ while keep_playing==True:
       boss_deaths=0
       hasSpawned=False
       hasSpawnedFinal=False
+      hasSpawnedQueen=False
+      finalDead=False
       threshold=85
       spawnedBoss=False
       enemy_limit=25
@@ -450,7 +458,7 @@ while keep_playing==True:
     frame_ticks = 0
     enemySpawnChance=random.randint(0,100)
   else:
-    if hasSpawnedFinal==True or hasSpawnedQueen == True:
+    if (hasSpawnedFinal==True and finalDead==True) or (inAether == True and hasSpawnedQueen == True):
       frame_ticks+=3
     else:
       frame_ticks+=1
