@@ -200,7 +200,7 @@ cosmic_mine_sound = pygame.mixer.Sound("cosmic_mine_fire.mp3")
 boom = pygame.mixer.Sound("boom.ogg")
 cosmic_mine_recharge= pygame.mixer.Sound("cosmic_mine_recharge.mp3")
 kill=pygame.mixer.Sound("enemy_dead.mp3")
-if random.randint(0,100) == 100:
+if random.randint(0,100) >= 75:
   impact=pygame.mixer.Sound("impact_fatmagic.mp3")
 else:
   impact=pygame.mixer.Sound("impact.mp3")
