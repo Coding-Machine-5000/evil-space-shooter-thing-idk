@@ -10,6 +10,7 @@ enemy_list=[]
 enemy_rects=[]
 enemy_health=[]
 bg_island_list=["BGVanilla.png","BGReef.png","BGWilds.png","BGCorruption.png"]
+val_hurt_ran=["impact_val1.ogg","impact_val2.ogg","impact_val3.ogg"]
 #start the pygame module 
 pygame.mixer.init()
 pygame.init() 
@@ -124,13 +125,13 @@ def update_bullet(rate):
         if queenboss_health<=0:
           spawnedQueenBoss=False
           score+=25000
-          kill.play()
+          kill_valkyrie.play()
           boom.play()
           bullets.remove(bullets[i])
           bullet_rects.remove(bullet_rects[i])
         else:
           queenboss_health-=5
-          impact.play()
+          valkyrie_hurt.play()
           bullets.remove(bullets[i])
           bullet_rects.remove(bullet_rects[i])
       for h in range(0, len(enemy_list)-1):
@@ -143,13 +144,19 @@ def update_bullet(rate):
                 score+=200
               else:
                 score+=100
-              kill.play()
+              if inAether == True:
+                kill_valkyrie.play()
+              else:
+                kill.play()
               enemies_killed+=1
             else:
               enemy_health[h]-=25
               bullets.remove(bullets[i])
               bullet_rects.remove(bullet_rects[i])
-              bulletenemysounds.play(impact)
+              if inAether == True:
+                valkyrie_hurt.play()
+              else:
+                impact.play()
     except IndexError:
       print("Bullet update failure!")
 played2=False
@@ -193,7 +200,12 @@ cosmic_mine_sound = pygame.mixer.Sound("cosmic_mine_fire.mp3")
 boom = pygame.mixer.Sound("boom.ogg")
 cosmic_mine_recharge= pygame.mixer.Sound("cosmic_mine_recharge.mp3")
 kill=pygame.mixer.Sound("enemy_dead.mp3")
-impact=pygame.mixer.Sound("impact.mp3")
+if random.randint(0,100) == 100:
+  impact=pygame.mixer.Sound("impact_fatmagic.mp3")
+else:
+  impact=pygame.mixer.Sound("impact.mp3")
+valkyrie_hurt=pygame.mixer.Sound(val_hurt_ran[random.randint(0,2)])
+kill_valkyrie=pygame.mixer.Sound("val_death.ogg")
 begin=pygame.mixer.Sound("start.mp3")
 bulletenemysounds=pygame.mixer.Channel(1)
 minesounds=pygame.mixer.Channel(2)
@@ -224,6 +236,7 @@ while keep_playing==True:
     #will stop the game loop if escape is pressed 
     if event.type == pygame.QUIT:
       keep_playing = False
+  valkyrie_hurt=pygame.mixer.Sound(val_hurt_ran[random.randint(0,2)])
   text = font.render(str(round(score)), True, GRN)
   texthigh = font.render(str(round(highscore)), True, GRN)
   text2=font.render(str(enemies_killed), True, GRN)
@@ -267,9 +280,9 @@ while keep_playing==True:
       if spawnedBoss == True:
         boss_health-=475
       if spawnedFinalBoss == True:
-        finalboss_health-=725
+        finalboss_health-=695
       if spawnedQueenBoss == True:
-        queenboss_health-=1000
+        queenboss_health-=865
       for h in range(0,len(enemy_health)-1):
         enemy_health[h]-=10000
         enemy_list.remove(enemy_list[h])
@@ -341,11 +354,11 @@ while keep_playing==True:
     if queenboss_y>=1000:
       enemies_escaped=10
     if queenboss_health <= 1500 and queenboss_health >=1000 and state=="Loop":
-      screen.blit(text3, (475, 825))
+      screen.blit(text6, (475, 825))
     elif queenboss_health <= 999 and queenboss_health >= 100 and state=="Loop":
-      screen.blit(text3, (510, 825))
+      screen.blit(text6, (510, 825))
     elif queenboss_health <=99 and queenboss_health >=0 and state=="Loop":
-      screen.blit(text3, (545, 825))
+      screen.blit(text6, (545, 825))
   if spawnedFinalBoss==True and state=="Loop":
     screen.blit(finalbossSprite, (158,finalboss_y))
     finalboss_y+=0.1
