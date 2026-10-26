@@ -3,6 +3,8 @@ import pygame
 import random
 import time
 import os
+import requests
+username=input("Enter a username to be written to the leaderboard automatically: ")
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
 bullets=[]
 bullet_rects=[]
@@ -63,7 +65,7 @@ spawnedQueenBoss=False
 hasSpawnedQueen=False
 boss_health_base=1500
 finalboss_health_base=6000
-queenboss_health_base=3000
+queenboss_health_base=7000
 queenboss_health=queenboss_health_base
 finalboss_health=finalboss_health_base
 boss_health=boss_health_base
@@ -277,6 +279,8 @@ while keep_playing==True:
       create_bullet()
   if spawnedFinalBoss==True:
     update_bullet(10)
+  elif spawnedQueenBoss==True:
+    update_bullet(15)
   else:
     update_bullet(5)
   if my <= 200 and state=="Loop":
@@ -287,18 +291,16 @@ while keep_playing==True:
         finalboss_health-=695
       if spawnedQueenBoss == True:
         queenboss_health-=865
-      for h in range(0,len(enemy_health)-1):
-        enemy_health[h]-=10000
-        enemy_list.remove(enemy_list[h])
-        enemy_rects.remove(enemy_rects[h])
-        enemy_health.remove(enemy_health[h])
-        score+=100
-        enemies_killed+=1
+      enemies_killed+=len(enemy_list)
+      score+=len(enemy_list)*200
+      enemy_list.clear()
+      enemy_rects.clear()
+      enemy_health.clear()
     except IndexError:
       print("Cosmic Mine failure!")
     minesounds.play(boom)
     played2=False
-    mine_cooldown=1000
+    mine_cooldown=2000
     my=playerbase
     firedMine=False
   if mine_cooldown <= 0 and state=="Loop":
@@ -341,9 +343,13 @@ while keep_playing==True:
   elif enemies_killed >= 700  and enemies_killed <= 715 and spawnedQueenBoss == False and hasSpawnedQueen==False and state=="Loop":
     spawnedQueenBoss=True
     hasSpawnedQueen=True
-  elif (enemies_killed >= 400 and enemies_killed <=415) or (enemies_killed >= 1000 and enemies_killed <=1015) or (enemies_killed >= 1500 and enemies_killed <=1515) or (enemies_killed >= 2000 and enemies_killed <=2015) and hasSpawnedQueen == True and state == "Loop":
+  elif (enemies_killed >= 1000 and enemies_killed <=1015) or (enemies_killed >= 1500 and enemies_killed <=1515) or (enemies_killed >= 2000 and enemies_killed <=2015) and hasSpawnedQueen == True and state == "Loop":
     for i in range(0,50):
       if len(enemy_list) <= 150:
+        spawn_enemy(random.randint(0,screen_width-64),random.randint(-250,-75), 25)
+  elif enemies_killed >=400 and enemies_killed <=415 and state == "Loop" and hasSpawnedQueen==True:
+    for i in range(0,50):
+      if len(enemy_list) <= 50:
         spawn_enemy(random.randint(0,screen_width-64),random.randint(-250,-75), 25)
   if spawnedBoss==True and state=="Loop":
     screen.blit(bossSprite, (234,boss_y))
@@ -365,7 +371,7 @@ while keep_playing==True:
     queenbossRect.x=234
     if queenboss_y>=1000:
       enemies_escaped=10
-    if queenboss_health <= 1500 and queenboss_health >=1000 and state=="Loop":
+    if queenboss_health <= 7000 and queenboss_health >=1000 and state=="Loop":
       screen.blit(text6, (475, 825))
     elif queenboss_health <= 999 and queenboss_health >= 100 and state=="Loop":
       screen.blit(text6, (510, 825))
@@ -434,13 +440,22 @@ while keep_playing==True:
       enemy_health.clear()
       begin.play()
       inAether=False
-      if aethercontrol == True:
-        aethercontrol=False
-        try:
-          currentMusic=pygame.mixer.music.load(background)
-          pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
-        except:
-          print("Missing the file for music!")
+      try:
+        url = "http://127.0.0.1:5000/add"
+        parameters = {    "username": username,    "score": highscore}
+        response = requests.get(url, params=parameters)
+        response.raise_for_status()
+        data = response.json()
+        print("Successfully written results to leaderboard:", data["result"])
+        if aethercontrol == True:
+          aethercontrol=False
+          try:
+            currentMusic=pygame.mixer.music.load(background)
+            pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
+          except:
+            print("Missing the file for music!")
+      except:
+        print("The web server is not running!")
   elif score >= highscore:
     highscore=score
   screen.blit(text,(0, 900))

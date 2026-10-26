@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from forms import Leaderboard
 import sqlite3
 app=Flask(__name__)
@@ -11,6 +11,9 @@ def home():
 
 @app.route('/submit', methods=['GET','POST'] )
 def form():
+    username = request.args.get("username", default=0, type=int)    
+    score = request.args.get("score", default=0, type=int)       
+    result = str("Username:", username, " Score:", score)
     form=Leaderboard()
     if request.method == 'POST' and form.validate_on_submit():
         username = request.form['username']
@@ -23,8 +26,7 @@ def form():
             users.commit()
         return render_template("index.html")
     else:
-        return render_template('form.html', form=form)
-
+        return render_template('form.html', form=form), jsonify({"Data given is": result})
 @app.route('/leaderboard', methods=['GET','POST'] )
 def leaderboard():
     connect = sqlite3.connect('scoreboard.db')
