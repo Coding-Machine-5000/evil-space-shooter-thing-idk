@@ -11,6 +11,7 @@ enemy_rects=[]
 enemy_health=[]
 bg_island_list=["BGVanilla.png","BGReef.png","BGWilds.png","BGCorruption.png"]
 val_hurt_ran=["impact_val1.ogg","impact_val2.ogg","impact_val3.ogg"]
+aethermusic_ran=["Aether1.mp3","Aether2.mp3","Aether3.mp3"]
 #start the pygame module 
 pygame.mixer.init()
 pygame.init() 
@@ -216,7 +217,7 @@ alarm=pygame.mixer.Sound("escape_warning.wav")
 screenSprite=pygame.image.load(screen_go)
 try:
   background = "End.mp3"
-  background_aether = "Aether.mp3"
+  background_aether = aethermusic_ran[random.randint(0,2)]
   bulletenemysounds.play(begin,loops=0,maxtime=0,fade_ms=0)
   currentMusic=pygame.mixer.music.load(background)
   pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
@@ -337,9 +338,13 @@ while keep_playing==True:
     enemy_list.clear()
     enemy_health.clear()
     enemy_rects.clear()
-  elif enemies_killed >= 700 and spawnedQueenBoss == False and hasSpawnedQueen==False and state=="Loop":
+  elif enemies_killed >= 700  and enemies_killed <= 715 and spawnedQueenBoss == False and hasSpawnedQueen==False and state=="Loop":
     spawnedQueenBoss=True
     hasSpawnedQueen=True
+  elif (enemies_killed >= 400 and enemies_killed <=415) or (enemies_killed >= 1000 and enemies_killed <=1015) or (enemies_killed >= 1500 and enemies_killed <=1515) or (enemies_killed >= 2000 and enemies_killed <=2015) and hasSpawnedQueen == True and state == "Loop":
+    for i in range(0,50):
+      if len(enemy_list) <= 150:
+        spawn_enemy(random.randint(0,screen_width-64),random.randint(-250,-75), 25)
   if spawnedBoss==True and state=="Loop":
     screen.blit(bossSprite, (234,boss_y))
     boss_y+=0.3
