@@ -259,9 +259,9 @@ while keep_playing==True:
   mineSprite = pygame.image.load(mine)
   playerSprite = pygame.image.load(player)
   pressed = pygame.key.get_pressed()
-  if pressed[pygame.K_LEFT] and state=="Loop":
+  if pressed[pygame.K_LEFT] or pressed[pygame.K_a] and state=="Loop":
     move_player(0,7)
-  elif pressed[pygame.K_RIGHT] and state=="Loop":
+  elif pressed[pygame.K_RIGHT] or pressed[pygame.K_d] and state=="Loop":
     move_player(1,7)
   score+=0.1
   print("Game is running")
@@ -278,7 +278,7 @@ while keep_playing==True:
   else:
     mx=x
     my=playerbase
-  if pressed[pygame.K_f] and state=="Loop":
+  if pressed[pygame.K_f] or pressed[pygame.K_SPACE] and state=="Loop":
     if frame_ticks == 15 or frame_ticks ==30 and state=="Loop":
       create_bullet()
   if spawnedFinalBoss==True:
