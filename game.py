@@ -33,6 +33,7 @@ GRN=(0,200,0)
 BLU=(0,0,200)
 #other variable initializers (fonts, text, images, etc)
 bullet='bullet_up.png'
+goldenbullet='bullet_golden.png'
 mine='cosmic_mine.png'
 player='player.png'
 enemy='enemy.png'
@@ -168,7 +169,10 @@ def update_bullet(rate):
 played2=False
 def create_bullet():
   global playerbulletRect
-  playerbulletSprite = pygame.image.load(bullet)
+  if inAether == True:
+      playerbulletSprite = pygame.image.load(goldenbullet)
+  else:
+    playerbulletSprite = pygame.image.load(bullet)
   bullets.append(playerbulletSprite)
   playerbulletRect = playerbulletSprite.get_rect()
   playerbulletRect.x=x
@@ -447,15 +451,15 @@ while keep_playing==True:
         response.raise_for_status()
         data = response.json()
         print("Successfully written results to leaderboard:", data["result"])
-        if aethercontrol == True:
+      except:
+        print("The web server is not running!")
+      if aethercontrol == True:
           aethercontrol=False
           try:
             currentMusic=pygame.mixer.music.load(background)
             pygame.mixer.music.play(loops=-1, start=0.0, fade_ms=0) 
           except:
             print("Missing the file for music!")
-      except:
-        print("The web server is not running!")
   elif score >= highscore:
     highscore=score
   screen.blit(text,(0, 900))
