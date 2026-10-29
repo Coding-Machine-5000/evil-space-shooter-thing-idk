@@ -14,6 +14,9 @@ enemy_health=[]
 bg_island_list=["BGVanilla.png","BGReef.png","BGWilds.png","BGCorruption.png"]
 val_hurt_ran=["impact_val1.ogg","impact_val2.ogg","impact_val3.ogg"]
 aethermusic_ran=["Aether1.mp3","Aether2.mp3","Aether3.mp3"]
+bullet_fails=0
+enemy_fails=0
+mine_fails=0
 #start the pygame module 
 pygame.mixer.init()
 pygame.init() 
@@ -94,6 +97,7 @@ def update_bullet(rate):
   global spawnedQueenBoss
   global queenboss_health
   global finalDead
+  global bullet_fails
   for i in range(0,len(bullets)-1):
     try:
       bullet_rects[i].y-=rate
@@ -164,8 +168,9 @@ def update_bullet(rate):
                 valkyrie_hurt.play()
               else:
                 impact.play()
-    except IndexError:
-      print("Bullet update failure!")
+    except:
+      bullet_fails+=1
+      print("Bullet update failure! (Instance #"+str(bullet_fails)+")")
 played2=False
 def create_bullet():
   global playerbulletRect
@@ -180,6 +185,7 @@ def create_bullet():
   bullet_rects.append(playerbulletRect)  
 def update_enemy(rate):
   global enemies_escaped
+  global enemy_fails
   try:
     for h in range(0,len(enemy_list)-1):
       enemy_rects[h].y+=rate
@@ -189,8 +195,9 @@ def update_enemy(rate):
         enemy_health.remove(enemy_health[h])
         enemies_escaped+=1
         alarm.play()
-  except IndexError:
-    print("Enemy update failure!")
+  except:
+    enemy_fails+=1
+    print("Enemy update failure! (Instance #"+str(enemy_fails)+")")
 def spawn_enemy(posx,posy,hp):
   global enemyRect
   enemySprite=pygame.image.load(enemy)
@@ -240,6 +247,7 @@ clock = pygame.time.Clock()
 #variable to control the game loop 
 keep_playing=True 
 #Game Loop - needed to keep updating and redrawing the screen 
+print("\033[H\033[J", end="")
 while keep_playing==True: 
   #iterates over the current list of events(checks for events)  
   for event in pygame.event.get(): 
@@ -259,12 +267,11 @@ while keep_playing==True:
   mineSprite = pygame.image.load(mine)
   playerSprite = pygame.image.load(player)
   pressed = pygame.key.get_pressed()
-  if pressed[pygame.K_LEFT] or pressed[pygame.K_a] and state=="Loop":
+  if (pressed[pygame.K_LEFT] or pressed[pygame.K_a]) and state=="Loop":
     move_player(0,7)
-  elif pressed[pygame.K_RIGHT] or pressed[pygame.K_d] and state=="Loop":
+  elif (pressed[pygame.K_RIGHT] or pressed[pygame.K_d]) and state=="Loop":
     move_player(1,7)
   score+=0.1
-  print("Game is running")
   if pressed[pygame.K_m] and canFireMine == True and state=="Loop":
     if played2==False:
       played2=True
@@ -278,7 +285,7 @@ while keep_playing==True:
   else:
     mx=x
     my=playerbase
-  if pressed[pygame.K_f] or pressed[pygame.K_SPACE] and state=="Loop":
+  if (pressed[pygame.K_f] or pressed[pygame.K_SPACE]) and state=="Loop":
     if frame_ticks == 15 or frame_ticks ==30 and state=="Loop":
       create_bullet()
   if spawnedFinalBoss==True:
@@ -300,8 +307,9 @@ while keep_playing==True:
       enemy_list.clear()
       enemy_rects.clear()
       enemy_health.clear()
-    except IndexError:
-      print("Cosmic Mine failure!")
+    except:
+      mine_fails+=1
+      print("Cosmic Mine failure! (Instance #"+str(mine_fails)+")")
     minesounds.play(boom)
     played2=False
     mine_cooldown=2000
@@ -423,6 +431,15 @@ while keep_playing==True:
     state="Game Over"
     score=0
     screen.blit(screenSprite, (100,200))
+    try:
+      url = "http://127.0.0.1:3000/add"
+      parameters = {    "username": username,    "score": highscore}
+      response = requests.get(url, params=parameters)
+      response.raise_for_status()
+      data = response.json()
+      print("Successfully written results to leaderboard:", data["result"])
+    except:
+      print("The web server is not running!")
     if pressed[pygame.K_r]:
       state="Loop"
       enemies_escaped=0
@@ -444,15 +461,6 @@ while keep_playing==True:
       enemy_health.clear()
       begin.play()
       inAether=False
-      try:
-        url = "http://127.0.0.1:5000/add"
-        parameters = {    "username": username,    "score": highscore}
-        response = requests.get(url, params=parameters)
-        response.raise_for_status()
-        data = response.json()
-        print("Successfully written results to leaderboard:", data["result"])
-      except:
-        print("The web server is not running!")
       if aethercontrol == True:
           aethercontrol=False
           try:
@@ -476,7 +484,6 @@ while keep_playing==True:
   #This function call updates the screen 
   pygame.display.update() 
   update_enemy(1)
-  print("\033[H\033[J", end="")
   #sets the frame rate
   clock.tick(60) 
   if frame_ticks >= 30:
@@ -490,3 +497,4 @@ while keep_playing==True:
 #quits the pygame module 
 pygame.quit() 
 quit()
+print("\033[H\033[J", end="")
